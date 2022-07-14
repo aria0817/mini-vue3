@@ -1,0 +1,25 @@
+<div id="app">
+    <h3>{{ state.title }}</h3>
+    <button @click="add">add Count</button>
+</div>
+<script src="http://unpkg.com/vue@next"></script>
+<script>
+    const {
+        createApp,
+        reactive
+    } = Vue;
+    const app = createApp({
+        setup(){
+            const state = reactive({
+                title:'hello vue3'
+            })
+
+            function add(){
+                state.title = 'hhhhhhhhhh'
+            }
+
+            return { state }
+        }
+    });
+    app.mount('#app')
+</script>
