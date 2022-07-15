@@ -1,0 +1,138 @@
+<div id="app"></div>
+<script src="http://unpkg.com/vue@next"></script>
+<script>
+    const {
+        createRenderer,
+        ref
+    } = Vue
+    /*
+    RendererOptions是一个对象，定义了对元素/属性的增删改查功能，
+    其作为参数传递给createRenderer（准确的说是baseCreateRenderer），
+    根据传递的方法不同，来满足用户对于自定义元素和属性处理方式的要求
+    **/
+    // const { render, createApp } = createRenderer(RendererOptions)
+
+
+    const renderer = createRenderer({
+        /**
+         * @description: 创建DOM元素
+         * @param {*} tag 来自template模板内所有元素的标签名
+         * @return {*}
+         */
+        createElement(tag) {
+            //tag的值为'bar-chart',直接作为对象返回，后续会作为一个el元素操作
+            return {
+                tag
+            }
+        },
+        /**
+         * @description: 元素属性操作
+         * @param {*} el 来自createElement创建的元素
+         * @param {*} key 创建元素的所有属性名
+         * @param {*} prevValue 首次执行为空
+         * @param {*} nextValue 创建元素的当前的属性名
+         * @return {*}
+         */
+        patchProp(el, key, prevValue, nextValue) {
+            //将元素属性加入到el中
+            el[key] = nextValue;
+        },
+        /**
+         * @description: 插入元素
+         * @param {*} child 来自createElement返回的元素，本例中为el对象
+         * @param {*} parent 来自于mount传递的元素
+         * @return {*}
+         */
+        insert(child, parent) {
+            //draw完成canvas的绘制并返回canvas元素
+            const childNode = draw(child);
+            //将canvas元素插入到div#app中
+            parent.appendChild(childNode);
+            //如果组件有绑定事件，则执行
+            if (child.onClick) {
+                childNode.addEventListener('click', () => {
+                    child.onClick();
+                })
+            }
+        },
+    })
+
+    function createCanvasApp(...args) {
+        const app = renderer.createApp(...args);
+        const {
+            mount
+        } = app;
+        app.config.isCustomElement = tag => tag === 'bar-chart'
+        app.mount = (containerOrSelector) => {
+            const container = document.querySelector(containerOrSelector);
+            console.log(container);
+            container.innerHTML = ''
+            const proxy = mount(container)
+            return proxy
+        }
+
+        return app
+    }
+
+    /**
+     * @description: 柱状图绘制
+     * @param {*} canvas canvas元素
+     * @param {*} props 即前文的child对象，表示tag标签名和数据或者事件
+     * @return {*}
+     */
+    const drawBarChart = (canvas, props) => {
+        const width = canvas.width = window.innerWidth;
+        const height = canvas.height = window.innerHeight;
+        const OriginPos = {
+            x: 50,
+            y: 100,
+        };
+        const step = 20;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+        const {
+            data
+        } = props;
+        data.forEach((chartDatas, index) => {
+            ctx.fillStyle = chartDatas.color;
+            ctx.fillRect(OriginPos.x + step * index, OriginPos.y, 10, chartDatas.count);
+        });
+    }
+    /**
+     * @description: 通过传递过来的创建canvas需要的tag标签名和数据或者事件
+     * @param {*} child 一个对象，表示tag标签名和数据或者事件
+     * @return {*} canvas元素
+     */
+    const draw = (child) => {
+        let canvas;
+        if (child.tag == 'bar-chart') {
+            canvas = document.createElement('canvas');
+        }
+        drawBarChart(canvas, child);
+        return canvas;
+    }
+
+    const chartData = [{
+            title: '青铜',
+            count: 200,
+            color: 'brown'
+        },
+        {
+            title: '砖石',
+            count: 300,
+            color: 'skyblue'
+        },
+        {
+            title: '王者',
+            count: 50,
+            color: 'gold'
+        },
+    ]
+    createCanvasApp({
+            template: '<bar-chart :data="dataRef"></bar-chart>',
+            setup() {
+                const dataRef = ref(chartData)
+            }
+        })
+        .mount("#app")
+</script>

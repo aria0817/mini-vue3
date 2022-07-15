@@ -1,0 +1,35 @@
+<div id="app">
+    <h3>{{title}}</h3>
+</div>
+<script src="http://unpkg.com/vue@next"></script>
+<script src="./nodeops.js"></script>
+<script>
+    const {
+        createRenderer
+    } = Vue;
+    // 1.基本结构
+    const vueTest = {
+        createApp(options) {
+            // web dom平台
+            const renderer = createRenderer(nodeOps)
+            return renderer.createApp(options)
+        }
+    }
+</script>
+<script>
+    // vue2: new Vue
+    // vue3: createApp()
+    const {
+        createApp
+    } = vueTest
+    const app = createApp({
+        setup() {
+            return {
+                title: 'vue3,hello!'
+            }
+        }
+    })
+    // app.use(store)
+    // app.directive()
+    app.mount('#app')
+</script>
