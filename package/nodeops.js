@@ -98,5 +98,5 @@ const nodeOps= {
         anchor ? anchor.previousSibling : parent.lastChild
       ]
     }
-  }
+}
   

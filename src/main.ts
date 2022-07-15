@@ -37,7 +37,7 @@
 // }
 
 
-import { createApp } from './runtime-render.js';
+import { createApp } from 'vue'
 
 import App from './App.vue'
 
